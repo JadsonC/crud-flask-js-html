@@ -21,8 +21,13 @@ def cadastrar_usuario():
         "senha": request.form.get("senha"),
         "perfil": request.form.get("perfil", "user")
     }
-    usuario = UsuarioService.cadastrar(dados)
-    return f"Usuário '{usuario.nome}' cadastrado com sucesso!"
+    status = UsuarioService.cadastrar(dados)
+    
+    if status:
+        return f"Usuário '{dados['nome']}' cadastrado com sucesso!"
+    else:
+        return f"Erro ao cadastrar usuário"
+        
 
 # ---------- LOGIN / LOGOUT ---------- #
 @usuario_bp.route("/login", methods=["POST"])

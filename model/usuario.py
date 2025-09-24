@@ -8,7 +8,7 @@ class Usuario:
         self.cpf = cpf
         self.email = email
         self.idade = idade
-        self.senha = bcrypt.hashpw(senha.encode("utf-8"), bcrypt.gensal()).decode("utf-8")
+        self.senha = bcrypt.hashpw(senha.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         self.perfil = perfil
 
 

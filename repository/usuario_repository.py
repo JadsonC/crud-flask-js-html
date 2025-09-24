@@ -1,50 +1,76 @@
-import json
-import os
+import mysql.connector
+
+def get_connection():
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="admin",
+        database="crud_db"
+    )
 
 class UsuarioRepository:
-    ARQUIVO = "usuarios.json"
+    
+    @staticmethod
+    def listar():
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM usuarios")
+        usuarios = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return usuarios
 
-    @classmethod
-    def carregar(cls):
-        if os.path.exists(cls.ARQUIVO):
-            with open(cls.ARQUIVO, "r", encoding="utf-8") as f:
-                return json.load(f)
-        return []
 
-    @classmethod
-    def salvar(cls, usuarios):
-        with open(cls.ARQUIVO, "w", encoding="utf-8") as f:
-            json.dump(usuarios, f, indent=4)
-
-    @classmethod
-    def adicionar(cls, usuario):
-        usuarios = cls.carregar()
-        usuarios.append(usuario.to_dict())
-        cls.salvar(usuarios)
-
-    @classmethod
-    def buscar_por_email(cls, email):
-        usuarios = cls.carregar()
-        for u in usuarios:
-            if u["email"] == email:
-                return u
-        return None
-
-    @classmethod
-    def deletar(cls, id):
-        usuarios = cls.carregar()
-        filtrados = [u for u in usuarios if u["id"] != id]
-        if len(usuarios) == len(filtrados):
+    @staticmethod
+    def adicionar(usuario):
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute("""
+                INSERT INTO usuarios (id, nome, cpf, email, idade, senha, perfil)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (usuario.id, usuario.nome, usuario.cpf, usuario.email,
+                usuario.idade, usuario.senha, usuario.perfil))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return True
+        except:
             return False
-        cls.salvar(filtrados)
-        return True
 
-    @classmethod
-    def atualizar(cls, usuario_edit):
-        usuarios = cls.carregar()
-        for u in usuarios:
-            if u["id"] == usuario_edit.get("id"):
-                u.update(usuario_edit)
-                cls.salvar(usuarios)
-                return True
-        return False
+    @staticmethod
+    def buscar_por_email(email):
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM usuarios WHERE email = %s", (email,))
+        usuario = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return usuario
+
+    @staticmethod
+    def deletar(id):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM usuarios WHERE id = %s", (id,))
+        conn.commit()
+        deleted = cursor.rowcount
+        cursor.close()
+        conn.close()
+        return deleted > 0
+
+    @staticmethod
+    def atualizar(usuario_edit):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE usuarios
+            SET nome = %s, cpf = %s, email = %s, idade = %s WHERE id = %s
+        """, (usuario_edit["nome"], usuario_edit["cpf"], usuario_edit["email"],
+            usuario_edit["idade"], usuario_edit["id"]))
+        conn.commit()
+        updated = cursor.rowcount
+        cursor.close()
+        conn.close()
+        return updated > 0
