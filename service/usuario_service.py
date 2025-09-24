@@ -10,8 +10,10 @@ class UsuarioService:
     @staticmethod
     # ** pega cada chave do dicionário e envia como se fosse um parâmetro nomeado para o construtor da classe Usuario.
         # Exemplo: usuario = Usuario(nome="Ana", cpf="12345678900", email="ana@email.com", idade=25, senha="1234", perfil="user")
-    def cadastar(dados):
+    def cadastrar(dados):
         usuario = Usuario(**dados)
+        status = UsuarioRepository.adicionar(usuario)
+        return status
 
     @staticmethod
     def autenticar(email, senha):
@@ -30,4 +32,4 @@ class UsuarioService:
 
     @staticmethod
     def listar():
-        return UsuarioRepository.carregar()
+        return UsuarioRepository.listar()
