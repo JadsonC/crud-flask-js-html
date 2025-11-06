@@ -1,10 +1,12 @@
 from flask import Flask
 from controller.usuario_controller import usuario_bp
-
+from flask_jwt_extended import JWTManager
 
 # Inicializa a aplicação Flask
 app = Flask(__name__)
-app.secret_key = "minha_chave_secreta" #chave necessária para sessão
+app.config["JWT_SECRET_KEY"] = "chave-secreta-super-segura"  # troque por algo seguro
+
+jwt = JWTManager(app)
 
 # 🔹 O Blueprint funciona como um "módulo de rotas"
 # Em vez de definir todas as rotas direto aqui no app,
